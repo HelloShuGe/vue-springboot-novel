@@ -423,4 +423,11 @@
       IS_ACTIVE = #{isActive,jdbcType=VARCHAR}
     where USER_EMAIL = #{userEmail,jdbcType=VARCHAR}
   </update>
+  <update id="updatePassword">
+    update user_info
+    set
+    USER_PASSWORD = #{password, jdbcType=VARCHAR}
+    where USER_EMAIL = #{userEmail, jdbcType=VARCHAR}
+  </update>
+
 </mapper>

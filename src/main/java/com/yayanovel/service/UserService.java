@@ -2,19 +2,19 @@ package com.yayanovel.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.yayanovel.entity.UserInfo;
-import com.yayanovel.entity.UserInfoExample;
 import com.yayanovel.mapper.UserInfoMapper;
 import com.yayanovel.util.DateTimeUtil;
+import com.yayanovel.util.ResponseVO;
 import com.yayanovel.util.UuidUtil;
-import org.apache.catalina.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import javax.xml.bind.util.JAXBSource;
 import java.util.Random;
+import java.util.ResourceBundle;
 
 
 /**
@@ -101,8 +101,7 @@ public class UserService {
      * @param userInfo
      * @return
      */
-    public JSONObject register(UserInfo userInfo){
-        JSONObject jsonObject = new JSONObject();
+    public ResponseVO register(UserInfo userInfo){
         String userEmail = userInfo.getUserEmail();
         UserInfo user = userInfoMapper.selectByEmail(userEmail);
         String uuid = null;
@@ -111,10 +110,8 @@ public class UserService {
             uuid = insertUser(userInfo);
         } else{
             if ("1".equals(user.getIsActive())){
-                jsonObject.put("code","400");
                 logger.info("用户已经注册");
-                jsonObject.put("message","The user is already registered!");
-                return jsonObject;
+                return ResponseVO.response(null, "The user is already registered!", 400);
             } else{
                 logger.info("用户没有注册");
                 uuid = updateActive(userInfo);
@@ -122,10 +119,8 @@ public class UserService {
         }
         String context = "<h1>此邮件为官方激活邮件！请点击下面链接完成激活操作！</h1> <a href=\"http://localhost:8080/active?code="+uuid+"\">激活请点击:"+uuid+"</a> ";
         mailService.sendSimplerMail(userEmail,subject,context);
-        jsonObject.put("code","200");
         logger.info("邮件已经发送，请登录邮箱进行激活");
-        jsonObject.put("message","The message has been sent, please log in to the mailbox activation!");
-        return jsonObject;
+        return ResponseVO.response(null,"The message has been sent, please log in to the mailbox activation!",200);
     }
 
     /**
@@ -133,30 +128,23 @@ public class UserService {
      * @param code
      * @return
      */
-    public JSONObject active(String code){
-        JSONObject jsonObject = new JSONObject();
+    public ResponseVO active(String code){
         UserInfo userInfo = userInfoMapper.selectByActiveCode(code);
         if(userInfo == null){
-            jsonObject.put("code","400");
             logger.info("无效验证码");
-            jsonObject.put("message","The verification code is not valid");
-            return jsonObject;
+            return ResponseVO.response(null,"The verification code is not valid", 400);
         }
         String nowTime = DateTimeUtil.getTime();
         String activeTime = userInfo.getActiveTime();
         Long nowLong = Long.parseLong(nowTime);
         Long activeLong = Long.parseLong(activeTime);
         if (nowLong - activeLong > 1){
-            jsonObject.put("code","400");
             logger.info("验证码超时");
-            jsonObject.put("message","The verification code timed out");
-            return jsonObject;
+            return ResponseVO.response(null, "The verification code timed out", 400);
         }
         userInfoMapper.updateActive(code);
-        jsonObject.put("code","200");
         logger.info("激活成功");
-        jsonObject.put("message","The activation was successful");
-        return jsonObject;
+        return ResponseVO.response(null,"The activation was successful", 200);
     }
 
     /**
@@ -173,4 +161,31 @@ public class UserService {
         return sb.toString();
     }
 
+    /**
+     * 修改密码
+     * @param userEmail
+     * @param originalPassword
+     * @param newPassword
+     * @return
+     */
+    public ResponseVO changePassword(String userEmail, String originalPassword, String newPassword){
+        UserInfo userInfo = userInfoMapper.selectByEmail(userEmail);
+        if (userInfo == null){
+            logger.info("用户账号不正确");
+            return ResponseVO.response(null, "User account does not exist",400);
+        }
+        String password = userInfo.getUserPassword();
+        if (!StringUtils.pathEquals(password, originalPassword)){
+            logger.info("用户输入密码不正确");
+            return ResponseVO.response(null, "The user entered the password incorrectly", 400);
+        }
+        int res = userInfoMapper.updatePassword(newPassword, userEmail);
+        if(res == 1){
+            logger.info("密码修改成功");
+            return ResponseVO.response(null, "Password reset complete", 200);
+        } else{
+            logger.info("密码修改失败");
+            return ResponseVO.response(null, "Password modification failed", 400);
+        }
+    }
 }

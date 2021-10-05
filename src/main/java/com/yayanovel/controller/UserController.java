@@ -1,9 +1,11 @@
 package com.yayanovel.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.yayanovel.controller.viewVO.PasswordChangeVO;
 import com.yayanovel.entity.UserInfo;
 import com.yayanovel.service.TokenService;
 import com.yayanovel.service.UserService;
+import com.yayanovel.util.ResponseVO;
 import com.yayanovel.util.ValidUtil;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -26,94 +28,97 @@ public class UserController {
     @Autowired
     private TokenService tokenService;
     private Logger logger = LoggerFactory.getLogger(UserController.class);
+
+    /**
+     * 登录接口
+     * @param userInfo
+     * @param response
+     * @return
+     */
     @ApiOperation(value = "登录", notes="登录")
-    @RequestMapping("/login")
-    public Object login(@RequestBody UserInfo userInfo, HttpServletResponse response){
-        JSONObject jsonObject = new JSONObject();
+    @RequestMapping(value="/login", method = RequestMethod.POST)
+    public ResponseVO login(@RequestBody UserInfo userInfo, HttpServletResponse response){
         UserInfo user = userService.selectByEmail(userInfo.getUserEmail());
         if (user == null){
-            jsonObject.put("code","400");
             logger.info("登录失败，用户未注册");
-            jsonObject.put("message", "The login failed and the user was not registered!");
-            return jsonObject;
+            return ResponseVO.response(null,"The login failed and the user was not registered!", 400);
         }
         if (!user.getUserPassword().equals(userInfo.getUserPassword())) {
-            jsonObject.put("code","400");
             logger.info("登录失败，用户名或者密码错误");
-            jsonObject.put("message", "Failed to log on, username or password error!");
-            return jsonObject;
+            return ResponseVO.response(null, "Failed to log on, username or password error!", 400);
         } else {
             if(!"1".equals(user.getIsActive())){
-                jsonObject.put("code","400");
                 logger.info("账号未激活，请登录邮箱进行激活");
-                jsonObject.put("message", "Account is not activated, please log in to the mailbox to activate!");
-                return jsonObject;
+                return ResponseVO.response(null,"Account is not activated, please log in to the mailbox to activate!",400);
             } else{
                 String token = tokenService.getToken(user);
-                jsonObject.put("token", token);
-                jsonObject.put("code","200");
+                JSONObject data = new JSONObject();
+                data.put("token", token);
                 logger.info("登录成功");
-                jsonObject.put("message","The login was successful");
                 Cookie cookie = new Cookie("token", token);
                 cookie.setPath("/");
                 response.addCookie(cookie);
-                return jsonObject;
+                return ResponseVO.response(data,"The login was successful", 200);
             }
         }
     }
-    //@UserLoginToken
-    @ApiOperation(value = "获取信息", notes = "获取信息")
-    @RequestMapping(value = "/getMessage" ,method = RequestMethod.GET)
-    public String getMessage() {
-        // 取出token中带的用户id 进行操作
-        return "您已通过验证";
-    }
-
     /**
      * 注册接口，首先传入用户email和用户密码，存入数据库，然后给用户发送邮件
      * 用户点击连接后，再激活用户
-     * @param userInfo
+     * @param userInfo 包括userEmail和password
      * @return
      */
     @ApiOperation(value = "注册", notes="注册")
-    @RequestMapping("/register")
-    public JSONObject register(@RequestBody UserInfo userInfo){
-        JSONObject jsonObject= new JSONObject();
+    @RequestMapping(value="/register",method = RequestMethod.POST)
+    public ResponseVO register(@RequestBody UserInfo userInfo){
         //参数校验
         String userEmail = (String)userInfo.getUserEmail();
         if (!ValidUtil.isValidEmail(userEmail)){
-            jsonObject.put("code","400");
             logger.info("邮箱格式不正确");
-            jsonObject.put("message","The mailbox is not in the correct format!");
-            return jsonObject;
+            return ResponseVO.response(null,"The mailbox is not in the correct format!", 400);
         }
         String userPassword = (String)userInfo.getUserPassword();
         if (!ValidUtil.isValidPassword(userPassword)){
-            jsonObject.put("code","400");
             logger.info("密码格式不正确");
-            jsonObject.put("message","The password is not in the correct format!");
-            return jsonObject;
+            return ResponseVO.response(null,"The password is not in the correct format!", 400);
         }
         return userService.register(userInfo);
     }
 
     /**
      * 邮箱激活
-     * @param code
+     * @param code 激活码
      * @return
      */
-    @ApiOperation(value = "激活", notes="激活")
-    @RequestMapping("/active")
-    public JSONObject active(@RequestParam("code") String code){
-        JSONObject jsonObject = new JSONObject();
+    @ApiOperation(value = "账号激活", notes="账号激活")
+    @RequestMapping(value="/active",method = RequestMethod.POST)
+    public ResponseVO active(@RequestParam("code") String code){
         if (StringUtils.isEmpty(code)){
-            jsonObject.put("code","400");
             logger.info("用户输入验证码为空");
-            jsonObject.put("message","The user input verification code is empty");
-            return jsonObject;
+            return ResponseVO.response(null,"The user input verification code is empty", 400);
         } else{
             return userService.active(code);
         }
     }
 
+    /**
+     * 修改密码
+     * @param passwordChangeVO
+     * @return
+     */
+    @ApiOperation(value = "修改密码", notes="修改密码")
+    @RequestMapping(value="/passwordChange",method = RequestMethod.POST)
+    public ResponseVO passwordChange(@RequestBody PasswordChangeVO passwordChangeVO){
+        String originalPassword = passwordChangeVO.getOriginalPassword();
+        String newPassword = passwordChangeVO.getNewPassword();
+        String quitPassword = passwordChangeVO.getQuitPassword();
+        String email = passwordChangeVO.getUserEmail();
+        if (!StringUtils.pathEquals(newPassword, quitPassword)){
+            return ResponseVO.response(null,"The two passwords are not the same",400);
+        }
+        if (!ValidUtil.isValidPassword(newPassword)){
+            return ResponseVO.response(null,"The new password format is incorrect", 400);
+        }
+        return userService.changePassword(email,originalPassword,newPassword);
+    }
 }

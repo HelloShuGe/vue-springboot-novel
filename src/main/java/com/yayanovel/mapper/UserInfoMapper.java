@@ -129,4 +129,12 @@ public interface UserInfoMapper {
      * @return
      */
     int updateAvtiveState(UserInfo userInfo);
+
+    /**
+     * 根据用户email修改密码
+     * @param password
+     * @param userEmail
+     * @return
+     */
+    int updatePassword(@Param("password") String password, @Param("userEmail") String userEmail);
 }

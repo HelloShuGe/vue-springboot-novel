@@ -37,3 +37,6 @@ mybatis:
 #token相关配置
 token:
   effectiveTime: 3600000
+#小说相关配置
+novel:
+  novelBasePath: /novel
