@@ -1,6 +1,7 @@
 package com.yayanovel.controller;
 
 import com.yayanovel.controller.viewVO.BookshelfVO;
+import com.yayanovel.entity.Bookmark;
 import com.yayanovel.entity.Bookshelf;
 import com.yayanovel.entity.Collection;
 import com.yayanovel.service.PersonService;
@@ -59,6 +60,12 @@ public class PersonController {
         }
         return personService.getBookshelf(userUid);
     }
+
+    /**
+     * 收藏章节
+     * @param collection
+     * @return
+     */
     @ApiOperation(value = "收藏章节", notes="收藏章节")
     @RequestMapping(value="/addChapter", method = RequestMethod.POST)
     public ResponseVO addChapter(@RequestBody Collection collection){
@@ -67,5 +74,50 @@ public class PersonController {
             return ResponseVO.response(null,"The chapter to be saved is empty",404);
         }
         return personService.addChapter(collection);
+    }
+    /**
+     * 根据用户uid展示收藏
+     * @param bookshelfVO
+     * @return
+     */
+    @ApiOperation(value = "个人图书馆展示", notes="个人图书馆展示")
+    @RequestMapping(value="/getCollection", method = RequestMethod.POST)
+    public ResponseVO getCollection(@RequestBody BookshelfVO bookshelfVO){
+        String userUid = bookshelfVO.getUserUid();
+        if (StringUtils.isEmpty(userUid)){
+            logger.info("输入的用户uid为空");
+            return ResponseVO.response(null,"The user uid entered is empty",404);
+        }
+        return personService.getCollection(userUid);
+    }
+
+    /**
+     * 添加书签
+     * @param bookmark
+     * @return
+     */
+    @ApiOperation(value = "添加书签", notes="添加书签")
+    @RequestMapping(value="/addBookmark", method = RequestMethod.POST)
+    public ResponseVO addBookmark(@RequestBody Bookmark bookmark){
+        if (bookmark == null){
+            logger.info("待添加的书签为空");
+            return ResponseVO.response(null,"The chapter to be saved is empty",404);
+        }
+        return personService.addBookmark(bookmark);
+    }
+    /**
+     * 根据用户uid展示书签
+     * @param bookshelfVO
+     * @return
+     */
+    @ApiOperation(value = "书签展示", notes="书签展示")
+    @RequestMapping(value="/getBookmark", method = RequestMethod.POST)
+    public ResponseVO getBookmark(@RequestBody BookshelfVO bookshelfVO){
+        String userUid = bookshelfVO.getUserUid();
+        if (StringUtils.isEmpty(userUid)){
+            logger.info("输入的用户uid为空");
+            return ResponseVO.response(null,"The user uid entered is empty",404);
+        }
+        return personService.getBookmark(userUid);
     }
 }

@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * 小说控制类
+ * 小说控制层
  */
 @RestController
 @RequestMapping("/novel")

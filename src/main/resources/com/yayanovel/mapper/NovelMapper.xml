@@ -401,4 +401,9 @@
     from
     novel order by READ_NUM
   </select>
+  <select id="selectUuidByName" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+    from novel
+    where NOVEL_NAME = #{novelName, jdbcType=VARCHAR}
+  </select>
 </mapper>

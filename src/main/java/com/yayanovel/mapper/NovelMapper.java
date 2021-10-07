@@ -102,4 +102,11 @@ public interface NovelMapper {
      * @return
      */
     List<UserInfo> selectHotNovel();
+
+    /**
+     * 根据小说名字获取uuid
+     * @param novelName
+     * @return
+     */
+    Novel selectUuidByName(@Param("novelName") String novelName);
 }
