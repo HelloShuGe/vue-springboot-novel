@@ -3,6 +3,7 @@ package com.yayanovel.service;
 import com.yayanovel.entity.Novel;
 import com.yayanovel.entity.NovelCategory;
 import com.yayanovel.entity.UserInfo;
+import com.yayanovel.mapper.ChapterMapper;
 import com.yayanovel.mapper.NovelCategoryMapper;
 import com.yayanovel.mapper.NovelMapper;
 import com.yayanovel.util.ResponseVO;
@@ -26,6 +27,8 @@ public class NovelService {
     private static Logger logger = LoggerFactory.getLogger(NovelService.class);
     @Autowired
     private NovelMapper novelMapper;
+    @Autowired
+    private ChapterMapper chapterMapper;
     @Autowired
     private NovelCategoryMapper novelCategoryMapper;
     @Value("${novel.novelBasePath}")
@@ -101,5 +104,14 @@ public class NovelService {
         novelCategory.setCategoryUid(uuid);
         novelCategory.setCategoryName(novelName);
         return novelCategoryMapper.insert(novelCategory);
+    }
+
+    /**
+     * 搜索小说
+     * @param searchWord
+     * @return
+     */
+    public List<Novel> searchNovel(String searchWord){
+        return novelMapper.searchNovel(searchWord);
     }
 }

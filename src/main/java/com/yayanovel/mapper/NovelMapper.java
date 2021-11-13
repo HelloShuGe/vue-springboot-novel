@@ -109,4 +109,11 @@ public interface NovelMapper {
      * @return
      */
     Novel selectUuidByName(@Param("novelName") String novelName);
+
+    /**
+     * 根据小说名字搜索小说（模糊查询）
+     * @param searchWord
+     * @return
+     */
+    List<Novel> searchNovel(@Param("searchWord") String searchWord);
 }

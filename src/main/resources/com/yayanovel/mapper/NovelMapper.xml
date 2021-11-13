@@ -406,4 +406,9 @@
     from novel
     where NOVEL_NAME = #{novelName, jdbcType=VARCHAR}
   </select>
+  <select id="searchNovel" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+    from novel
+    where NOVEL_NAME like "%"#{searchWord, jdbcType=VARCHAR}"%"
+  </select>
 </mapper>
