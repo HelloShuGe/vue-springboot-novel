@@ -1,0 +1,50 @@
+server:
+  port: 8080
+#数据库连接池
+spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  datasource:
+    # 数据库访问配置, 使用druid数据源(默认数据源是HikariDataSource)
+    type: com.alibaba.druid.pool.DruidDataSource
+    #链接池配置
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/yayanovel?useSSL=false&useUnicode=true&characterEncoding=UTF-8
+      username: root
+      password: Wwch@123
+  #邮箱配置
+  mail:
+    default-encoding: UTF-8
+    host: smtp.qq.com
+    username: 377411755@qq.com
+    password: hwggvhaaradxbheg
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            enable: true
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
+
+        port: 465
+        protocol: smtp
+    message:
+      subject: come from yayanovel active email
+
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.yayanovel.mapper
+
+#token相关配置
+token:
+  effectiveTime: 3600000
+#小说相关配置
+novel:
+  novelBasePath: /novel

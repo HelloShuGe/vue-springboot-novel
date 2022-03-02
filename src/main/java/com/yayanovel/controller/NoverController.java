@@ -25,7 +25,7 @@ import java.util.Random;
  * 小说控制层
  */
 @RestController
-@RequestMapping("/novel")
+@RequestMapping("/api/novel")
 public class NoverController {
     private static Logger logger = LoggerFactory.getLogger(NoverController.class);
     @Autowired

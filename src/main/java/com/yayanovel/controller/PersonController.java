@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 包括个人图书馆，收藏夹等
  */
 @RestController
+@RequestMapping("/api/person")
 public class PersonController {
     private static Logger logger = LoggerFactory.getLogger(PersonController.class);
     @Autowired

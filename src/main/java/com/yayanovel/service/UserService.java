@@ -113,11 +113,11 @@ public class UserService {
                 logger.info("用户已经注册");
                 return ResponseVO.response(null, "The user is already registered!", 400);
             } else{
-                logger.info("用户没有注册");
-                uuid = updateActive(userInfo);
+                logger.info("用户已经注册，请前往邮箱进行激活");
+                return ResponseVO.response(null,"The user is already registered,please log in to the mailbox activation!",400);
             }
         }
-        String context = "<h1>此邮件为官方激活邮件！请点击下面链接完成激活操作！</h1> <a href=\"http://localhost:8080/active?code="+uuid+"\">激活请点击:"+uuid+"</a> ";
+        String context = "<h1>此邮件为官方激活邮件！请点击下面链接完成激活操作！</h1> <a href=\"http://120.25.210.42:8080/api/user/active?code="+uuid+"\">激活请点击:"+uuid+"</a> ";
         mailService.sendSimplerMail(userEmail,subject,context);
         logger.info("邮件已经发送，请登录邮箱进行激活");
         return ResponseVO.response(null,"The message has been sent, please log in to the mailbox activation!",200);

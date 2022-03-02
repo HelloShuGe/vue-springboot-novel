@@ -1,6 +1,7 @@
 package com.yayanovel.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.yayanovel.controller.viewVO.LoginVO;
 import com.yayanovel.controller.viewVO.PasswordChangeVO;
 import com.yayanovel.entity.UserInfo;
 import com.yayanovel.service.TokenService;
@@ -22,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
  * 登录的控制层
  */
 @RestController
+@RequestMapping("/api/user")
 public class UserController {
     @Autowired
     private UserService userService;
@@ -31,19 +33,19 @@ public class UserController {
 
     /**
      * 登录接口
-     * @param userInfo
+     * @param loginVO
      * @param response
      * @return
      */
     @ApiOperation(value = "登录", notes="登录")
     @RequestMapping(value="/login", method = RequestMethod.POST)
-    public ResponseVO login(@RequestBody UserInfo userInfo, HttpServletResponse response){
-        UserInfo user = userService.selectByEmail(userInfo.getUserEmail());
+    public ResponseVO login(@RequestBody LoginVO loginVO, HttpServletResponse response){
+        UserInfo user = userService.selectByEmail(loginVO.getUsername());
         if (user == null){
             logger.info("登录失败，用户未注册");
             return ResponseVO.response(null,"The login failed and the user was not registered!", 400);
         }
-        if (!user.getUserPassword().equals(userInfo.getUserPassword())) {
+        if (!user.getUserPassword().equals(loginVO.getPassword())) {
             logger.info("登录失败，用户名或者密码错误");
             return ResponseVO.response(null, "Failed to log on, username or password error!", 400);
         } else {
@@ -91,7 +93,7 @@ public class UserController {
      * @return
      */
     @ApiOperation(value = "账号激活", notes="账号激活")
-    @RequestMapping(value="/active",method = RequestMethod.POST)
+    @RequestMapping(value="/active",method = RequestMethod.GET)
     public ResponseVO active(@RequestParam("code") String code){
         if (StringUtils.isEmpty(code)){
             logger.info("用户输入验证码为空");

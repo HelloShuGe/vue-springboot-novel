@@ -25,6 +25,20 @@ public class ResponseVO<T> implements Serializable {
         responseVO.setMsg(message);
         return responseVO;
     }
+    public static ResponseVO success(Object data, String message){
+        ResponseVO responseVO = new ResponseVO();
+        responseVO.setMsg(message);
+        responseVO.setCode(200);
+        responseVO.setData(data);
+        return responseVO;
+    }
+    public static ResponseVO failure(Object data, String message){
+        ResponseVO responseVO = new ResponseVO();
+        responseVO.setMsg(message);
+        responseVO.setCode(400);
+        responseVO.setData(data);
+        return responseVO;
+    }
 
     public int getCode() {
         return code;

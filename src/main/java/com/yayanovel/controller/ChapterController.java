@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 章节控制层
  */
 @RestController
-@RequestMapping("/chapter")
+@RequestMapping("/api/chapter")
 public class ChapterController {
     private Logger logger = LoggerFactory.getLogger(ChapterController.class);
     @Autowired
