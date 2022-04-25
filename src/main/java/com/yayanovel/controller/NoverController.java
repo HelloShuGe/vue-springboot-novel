@@ -1,6 +1,7 @@
 package com.yayanovel.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.yayanovel.controller.viewVO.HotNovelLen;
 import com.yayanovel.controller.viewVO.SearchNovelVO;
 import com.yayanovel.entity.Novel;
 import com.yayanovel.entity.UserInfo;
@@ -51,12 +52,13 @@ public class NoverController {
     }
     /**
      * 热门小说推荐
-     * @param len
+     * @param
      * @return
      */
     @ApiOperation(value = "热门小说推荐", notes="热门小说推荐")
     @RequestMapping(value="/getHotNovel",method = RequestMethod.POST)
-    public ResponseVO hotNovel(@Param("len") String len){
+    public ResponseVO hotNovel(@RequestBody HotNovelLen hotNovelLen){
+        String len = hotNovelLen.getHotNovelLen();
         if (StringUtils.isEmpty(len)){
             logger.info("输入的推荐个数为空");
             return ResponseVO.response(null,"Recommended number cannot be empty",400);
