@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletResponse;
  * 登录的控制层
  */
 @RestController
-@RequestMapping("/api/user")
 public class UserController {
     @Autowired
     private UserService userService;
@@ -37,8 +36,9 @@ public class UserController {
      * @param response
      * @return
      */
+    @CrossOrigin
     @ApiOperation(value = "登录", notes="登录")
-    @RequestMapping(value="/login", method = RequestMethod.POST)
+    @RequestMapping(value="api/login", method = RequestMethod.POST)
     public ResponseVO login(@RequestBody LoginVO loginVO, HttpServletResponse response){
         UserInfo user = userService.selectByEmail(loginVO.getUsername());
         if (user == null){

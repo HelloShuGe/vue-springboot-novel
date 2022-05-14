@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8443
 #数据库连接池
 spring:
   autoconfigure:
@@ -10,7 +10,7 @@ spring:
     #链接池配置
     druid:
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/yayanovel?useSSL=false&useUnicode=true&characterEncoding=UTF-8
+      url: jdbc:mysql://localhost:3306/novel?useSSL=false&useUnicode=true&characterEncoding=UTF-8
       username: root
       password: root
   #邮箱配置
