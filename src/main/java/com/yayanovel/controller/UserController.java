@@ -1,6 +1,7 @@
 package com.yayanovel.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.yayanovel.annocation.PassToken;
 import com.yayanovel.controller.viewVO.LoginVO;
 import com.yayanovel.controller.viewVO.PasswordChangeVO;
 import com.yayanovel.entity.UserInfo;
@@ -56,6 +57,7 @@ public class UserController {
                 String token = tokenService.getToken(user);
                 JSONObject data = new JSONObject();
                 data.put("token", token);
+                data.put("username", user.getUserEmail());
                 logger.info("登录成功");
                 Cookie cookie = new Cookie("token", token);
                 cookie.setPath("/");
@@ -65,13 +67,14 @@ public class UserController {
         }
     }
     /**
-     * 注册接口，首先传入用户email和用户密码，存入数据库，然后给用户发送邮件
-     * 用户点击连接后，再激活用户
+     * 注册接口，首先传入用户email和用户密码，存入数据库，
+     * 给邮箱发送验证码
      * @param userInfo 包括userEmail和password
      * @return
      */
+    @CrossOrigin
     @ApiOperation(value = "注册", notes="注册")
-    @RequestMapping(value="/register",method = RequestMethod.POST)
+    @RequestMapping(value="api/register",method = RequestMethod.POST)
     public ResponseVO register(@RequestBody UserInfo userInfo){
         //参数校验
         String userEmail = (String)userInfo.getUserEmail();
@@ -82,32 +85,41 @@ public class UserController {
         String userPassword = (String)userInfo.getUserPassword();
         if (!ValidUtil.isValidPassword(userPassword)){
             logger.info("密码格式不正确");
-            return ResponseVO.response(null,"The password is not in the correct format!", 400);
+            return ResponseVO.response(null,"The password is not in the correct format,Greater than or equal to 8 digits, must contain numbers and letters!", 400);
         }
         return userService.register(userInfo);
     }
-
     /**
-     * 邮箱激活
-     * @param code 激活码
+     * 注册接口，首先传入用户email和用户密码，存入数据库，
+     * 给邮箱发送验证码
+     * @param
      * @return
      */
-    @ApiOperation(value = "账号激活", notes="账号激活")
-    @RequestMapping(value="/active",method = RequestMethod.GET)
-    public ResponseVO active(@RequestParam("code") String code){
-        if (StringUtils.isEmpty(code)){
-            logger.info("用户输入验证码为空");
-            return ResponseVO.response(null,"The user input verification code is empty", 400);
-        } else{
-            return userService.active(code);
+    @CrossOrigin
+    @ApiOperation(value = "获取验证码", notes="获取验证码")
+    @RequestMapping(value="api/getcode",method = RequestMethod.POST)
+    public ResponseVO getCode(@RequestBody UserInfo userInfo){
+        //参数校验
+        String userEmail = (String)userInfo.getUserEmail();
+        if (!ValidUtil.isValidEmail(userEmail)){
+            logger.info("邮箱格式不正确");
+            return ResponseVO.response(null,"The mailbox is not in the correct format!", 400);
         }
+        String userPassword = (String)userInfo.getUserPassword();
+        if (!ValidUtil.isValidPassword(userPassword)){
+            logger.info("密码格式不正确");
+            return ResponseVO.response(null,"The password is not in the correct format,Greater than or equal to 8 digits, must contain numbers and letters!", 400);
+        }
+        return userService.getCode(userInfo);
     }
+
 
     /**
      * 修改密码
      * @param passwordChangeVO
      * @return
      */
+    @PassToken
     @ApiOperation(value = "修改密码", notes="修改密码")
     @RequestMapping(value="/passwordChange",method = RequestMethod.POST)
     public ResponseVO passwordChange(@RequestBody PasswordChangeVO passwordChangeVO){

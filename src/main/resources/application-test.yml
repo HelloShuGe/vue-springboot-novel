@@ -10,7 +10,7 @@ spring:
     #链接池配置
     druid:
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/novel?useSSL=false&useUnicode=true&characterEncoding=UTF-8
+      url: jdbc:mysql://localhost:3306/yayanovel?useSSL=false&useUnicode=true&characterEncoding=UTF-8
       username: root
       password: root
   #邮箱配置
@@ -47,4 +47,4 @@ token:
   effectiveTime: 3600000
 #小说相关配置
 novel:
-  novelBasePath: /novel
+  novelBasePath: D:\\项目\\novel

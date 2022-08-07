@@ -378,4 +378,31 @@
       TEXT2 = #{text2,jdbcType=VARCHAR}
     where CHAPTER_ID = #{chapterId,jdbcType=BIGINT}
   </update>
+  <select id="getChapterNum" parameterType="String" resultType="java.lang.Long">
+    select count(1) from chapter where NOVEL_UID = #{novelId}
+  </select>
+  <select id="getChapterByNovelPackage"  resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from chapter
+    where NOVEL_UID = #{novelUid,jdbcType=VARCHAR} order by CHAPTER_ID desc limit #{packageNum, jdbcType = BIGINT}, 50
+   </select>
+  <select id="getChapterByNovelUid"  resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from chapter
+    where NOVEL_UID = #{novelUid,jdbcType=VARCHAR} order by CHAPTER_ID desc
+  </select>
+  <select id="getChapterByChapterUid" parameterType="String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from chapter
+    where CHAPTER_UID = #{chapterUid,jdbcType=VARCHAR}
+  </select>
+  <!--  根据小说名字获取该小说第一个章节的名字-->
+  <select id="getChapter" resultType="java.lang.String">
+    select CHAPTER_NAME
+    from chapter
+    where NOVEL_NAME = #{novelName,jdbcType=VARCHAR} order by CHAPTER_ID desc limit 1;
+  </select>
 </mapper>

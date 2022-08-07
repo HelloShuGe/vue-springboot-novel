@@ -1,6 +1,8 @@
 package com.yayanovel.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.yayanovel.controller.viewVO.CatogaryVO;
+import com.yayanovel.controller.viewVO.ContentVO;
 import com.yayanovel.controller.viewVO.HotNovelLen;
 import com.yayanovel.controller.viewVO.SearchNovelVO;
 import com.yayanovel.entity.Novel;
@@ -26,7 +28,6 @@ import java.util.Random;
  * 小说控制层
  */
 @RestController
-@RequestMapping("/api/novel")
 public class NoverController {
     private static Logger logger = LoggerFactory.getLogger(NoverController.class);
     @Autowired
@@ -55,13 +56,16 @@ public class NoverController {
      * @param
      * @return
      */
+    @CrossOrigin
     @ApiOperation(value = "热门小说推荐", notes="热门小说推荐")
-    @RequestMapping(value="/getHotNovel",method = RequestMethod.POST)
+    @RequestMapping(value="api/getHotNovel",method = RequestMethod.POST)
     public ResponseVO hotNovel(@RequestBody HotNovelLen hotNovelLen){
         String len = hotNovelLen.getHotNovelLen();
         if (StringUtils.isEmpty(len)){
             logger.info("输入的推荐个数为空");
-            return ResponseVO.response(null,"Recommended number cannot be empty",400);
+            //传入参数为-1则是全量查询
+            List result = novelService.getHotNovel(-1);
+            return ResponseVO.response(result,"Get popular novel success",200);
         }
         int cnt = Integer.parseInt(len);
         List<UserInfo> list = novelService.getHotNovel(cnt);
@@ -69,10 +73,11 @@ public class NoverController {
         return ResponseVO.response(list,"Get popular novel success", 200);
     }
     /**
-     * 搜索小说
+     * 搜索小说,按照小说的名字模糊查询
      * @param
      * @return
      */
+    @CrossOrigin
     @ApiOperation(value = "搜索小说", notes="搜索小说")
     @RequestMapping(value="/searchNovel",method = RequestMethod.POST)
     public ResponseVO searchNovel(@RequestBody SearchNovelVO searchNovelVO){
@@ -84,5 +89,102 @@ public class NoverController {
         List<Novel> result = novelService.searchNovel(searchWord);
         return ResponseVO.response(result,"Search successful",200);
     }
+
+    /**
+     * 搜索小说类别
+     * @return
+     */
+    @CrossOrigin
+    @ApiOperation(value = "查询小说类别", notes="查询小说类别")
+    @RequestMapping(value="api/searchNovelCatogary",method = RequestMethod.POST)
+    public ResponseVO gethNovelCatogary(@RequestBody SearchNovelVO searchNovelVO){
+        List result = novelService.getNovelCatogary();
+        return ResponseVO.response(result,"Search successful",200);
+    }
+
+    /**
+     * 搜索小说,全量搜索
+     * @param
+     * @return
+     */
+    @CrossOrigin
+    @ApiOperation(value = "搜索小说", notes="搜索小说")
+    @RequestMapping(value="api/searchNovelAll",method = RequestMethod.POST)
+    public ResponseVO searchNovelAll(){
+        List<Novel> result = novelService.getNovelAll();
+        logger.info(result.get(0).getIsEnd());
+        return ResponseVO.response(result,"Search successful",200);
+    }
+    /**
+     * 获取小说内容
+     * @param
+     * @return
+     */
+    @CrossOrigin
+    @ApiOperation(value = "获取小说内容", notes="获取小说内容")
+    @RequestMapping(value="api/getContent",method = RequestMethod.POST)
+    public ResponseVO getContent(@RequestBody ContentVO contentVO){
+        String novelName = contentVO.getNovelName();
+        String chapterName = contentVO.getChapterName();
+        List<String> result = novelService.getContent(novelName,chapterName);
+        return ResponseVO.response(result,"Search successful",200);
+    }
+    /**
+     * 搜索连载的小说
+     * @param
+     * @return
+     */
+    @CrossOrigin
+    @ApiOperation(value = "获取小说内容", notes="获取小说内容")
+    @RequestMapping(value="api/getOngoingNovel",method = RequestMethod.POST)
+    public ResponseVO getOngoingNovel(){
+        logger.info("搜素连载小说");
+        List<Novel> result = novelService.getOngoingNovel();
+        return ResponseVO.response(result,"Search successful",200);
+    }
+    /**
+     * 搜索完结的小说
+     * @param
+     * @return
+     */
+    @CrossOrigin
+    @ApiOperation(value = "获取小说内容", notes="获取小说内容")
+    @RequestMapping(value="api/getCompletedNovel",method = RequestMethod.POST)
+    public ResponseVO getCompletedNovel(){
+        logger.info("搜素完结小说");
+        List<Novel> result = novelService.getCompletedNovel();
+        return ResponseVO.response(result,"Search successful",200);
+    }
+    /**
+     * 根据类别搜索小说
+     * @param
+     * @return
+     */
+    @CrossOrigin
+    @ApiOperation(value = "获取小说内容", notes="获取小说内容")
+    @RequestMapping(value="api/getCatogaryNovel",method = RequestMethod.POST)
+    public ResponseVO getCatogaryNovel(@RequestBody CatogaryVO catogaryVO){
+        String catogary = catogaryVO.getCatogary();
+        if(StringUtils.isEmpty(catogary)){
+            logger.info("位空");
+        }
+        logger.info("小说类别:" + catogary);
+        List<Novel> result = novelService.getCatogaryNovel(catogary);
+        return ResponseVO.response(result,"Search successful",200);
+    }
+    /**
+     * 测试代码，将小说第一章的前200个字符
+     * @param
+     * @return
+     */
+    @CrossOrigin
+    @ApiOperation(value = "获取小说内容", notes="获取小说内容")
+    @RequestMapping(value="api/insertIntroduction",method = RequestMethod.POST)
+    public ResponseVO insertIntroduction(){
+        logger.info("hhh");
+        novelService.insertIntrodection();
+        return null;
+    }
+
 
 }

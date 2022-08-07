@@ -117,6 +117,10 @@ public class Novel {
      *
      * @mbg.generated Sun Aug 29 22:58:10 CST 2021
      */
+    /**
+     * 小说章节数目
+     */
+    private Long chapterNum;
     public Long getNovelId() {
         return novelId;
     }
@@ -395,5 +399,13 @@ public class Novel {
      */
     public void setText2(String text2) {
         this.text2 = text2 == null ? null : text2.trim();
+    }
+
+    public Long getChapterNum() {
+        return chapterNum;
+    }
+
+    public void setChapterNum(Long chapterNum) {
+        this.chapterNum = chapterNum;
     }
 }

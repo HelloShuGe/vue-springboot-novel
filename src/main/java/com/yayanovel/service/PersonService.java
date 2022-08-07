@@ -1,14 +1,11 @@
 package com.yayanovel.service;
 
 import com.yayanovel.entity.Bookmark;
-import com.yayanovel.entity.Bookshelf;
 import com.yayanovel.entity.Collection;
 import com.yayanovel.mapper.BookmarkMapper;
-import com.yayanovel.mapper.BookshelfMapper;
 import com.yayanovel.mapper.CollectionMapper;
 import com.yayanovel.util.ResponseVO;
 import com.yayanovel.util.UuidUtil;
-import org.apache.ibatis.annotations.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

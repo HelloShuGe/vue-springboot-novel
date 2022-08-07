@@ -2,7 +2,6 @@ package com.yayanovel.controller;
 
 import com.yayanovel.controller.viewVO.BookshelfVO;
 import com.yayanovel.entity.Bookmark;
-import com.yayanovel.entity.Bookshelf;
 import com.yayanovel.entity.Collection;
 import com.yayanovel.service.PersonService;
 import com.yayanovel.util.ResponseVO;

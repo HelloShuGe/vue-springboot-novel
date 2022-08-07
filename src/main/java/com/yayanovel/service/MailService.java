@@ -21,7 +21,7 @@ import java.util.List;
 @Service
 public class MailService {
     @Value("${spring.mail.username}")
-    private String from;
+    private String username;
     @Autowired
     private JavaMailSender mailSender;
 
@@ -35,18 +35,24 @@ public class MailService {
      */
     public void sendSimplerMail(String to, String title, String content){
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-        simpleMailMessage.setFrom(from);
+        simpleMailMessage.setFrom(username);
         simpleMailMessage.setTo(to);
         simpleMailMessage.setSubject(title);
         simpleMailMessage.setText(content);
-        mailSender.send(simpleMailMessage);
-        logger.info("邮件发送成功");
+        try{
+            mailSender.send(simpleMailMessage);
+            logger.info("邮件发送成功");
+        }catch(Exception e){
+            logger.info("邮件发送失败");
+            throw e;
+        }
+
     }
     public void sendAttachmentsMail(String to, String title, String cotent, List<File> fileList){
         MimeMessage message = mailSender.createMimeMessage();
         try {
             MimeMessageHelper helper = new MimeMessageHelper(message,true);
-            helper.setFrom(from);
+            helper.setFrom(username);
             helper.setTo(to);
             helper.setSubject(title);
             helper.setText(cotent);

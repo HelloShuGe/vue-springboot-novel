@@ -53,16 +53,14 @@ public class UserService {
      * @param userInfo
      * @return
      */
-    public String insertUser(UserInfo userInfo){
+    public void insertUser(UserInfo userInfo, String code){
         //用户uuid
         String userUid = UuidUtil.getUUID();
         userInfo.setUserUid(userUid);
         //创建时间
         String createTime = DateTimeUtil.getTime();
         userInfo.setCreateTime(createTime);
-        //激活码
-        String activeCode = UuidUtil.getUUID();
-        userInfo.setActiveCode(activeCode);
+        userInfo.setActiveCode(code);
         //激活码创建时间
         String activeTime = DateTimeUtil.getTime();
         userInfo.setActiveTime(activeTime);
@@ -75,15 +73,13 @@ public class UserService {
         //设置随机昵称
         userInfo.setUserName(createName());
         userInfoMapper.insert(userInfo);
-        return activeCode;
     }
-    public String updateActive(UserInfo userInfo){
+    public void updateActive(UserInfo userInfo, String code){
         //创建时间
         String createTime = DateTimeUtil.getTime();
         userInfo.setCreateTime(createTime);
         //激活码
-        String activeCode = UuidUtil.getUUID();
-        userInfo.setActiveCode(activeCode);
+        userInfo.setActiveCode(code);
         //激活码创建时间
         String activeTime = DateTimeUtil.getTime();
         userInfo.setActiveTime(activeTime);
@@ -94,57 +90,63 @@ public class UserService {
         String updateTime = DateTimeUtil.getTime();
         userInfo.setUpdateTime(updateTime);
         userInfoMapper.updateAvtiveState(userInfo);
-        return activeCode;
     }
     /**
      * 注册服务层
      * @param userInfo
      * @return
      */
-    public ResponseVO register(UserInfo userInfo){
-        String userEmail = userInfo.getUserEmail();
-        UserInfo user = userInfoMapper.selectByEmail(userEmail);
-        String uuid = null;
-        if (user == null){
-            logger.info("用户没有注册");
-            uuid = insertUser(userInfo);
-        } else{
-            if ("1".equals(user.getIsActive())){
-                logger.info("用户已经注册");
-                return ResponseVO.response(null, "The user is already registered!", 400);
-            } else{
-                logger.info("用户已经注册，请前往邮箱进行激活");
-                return ResponseVO.response(null,"The user is already registered,please log in to the mailbox activation!",400);
-            }
-        }
-        String context = "<h1>此邮件为官方激活邮件！请点击下面链接完成激活操作！</h1> <a href=\"http://120.25.210.42:8080/api/user/active?code="+uuid+"\">激活请点击:"+uuid+"</a> ";
-        mailService.sendSimplerMail(userEmail,subject,context);
-        logger.info("邮件已经发送，请登录邮箱进行激活");
-        return ResponseVO.response(null,"The message has been sent, please log in to the mailbox activation!",200);
-    }
+//    public ResponseVO register(UserInfo userInfo){
+//        String userEmail = userInfo.getUserEmail();
+//        UserInfo user = userInfoMapper.selectByEmail(userEmail);
+//        String uuid = null;
+//        if (user == null){
+//            logger.info("用户没有注册");
+//            uuid = insertUser(userInfo);
+//        } else{
+//            if ("1".equals(user.getIsActive())){
+//                logger.info("用户已经注册");
+//                return ResponseVO.response(null, "The user is already registered!", 400);
+//            } else{
+//                logger.info("用户已经注册，请前往邮箱进行激活");
+//                return ResponseVO.response(null,"The user is already registered,please log in to the mailbox activation!",400);
+//            }
+//        }
+//        String context = "<h1>此邮件为官方激活邮件！请点击下面链接完成激活操作！</h1> <a href=\"http://120.25.210.42:8080/api/user/active?code="+uuid+"\">激活请点击:"+uuid+"</a> ";
+//        mailService.sendSimplerMail(userEmail,subject,context);
+//        logger.info("邮件已经发送，请登录邮箱进行激活");
+//        return ResponseVO.response(null,"The message has been sent, please log in to the mailbox activation!",200);
+//    }
 
     /**
      * 激活
-     * @param code
+     * @param
      * @return
      */
-    public ResponseVO active(String code){
-        UserInfo userInfo = userInfoMapper.selectByActiveCode(code);
-        if(userInfo == null){
-            logger.info("无效验证码");
+    public ResponseVO register(UserInfo userInfo){
+        UserInfo userInfo1 = userInfoMapper.selectByEmail(userInfo.getUserEmail());
+        if(userInfo1 == null){
+            logger.info("用户还没有获取验证码");
             return ResponseVO.response(null,"The verification code is not valid", 400);
         }
+        if(!userInfo.getActiveCode().equals(userInfo1.getActiveCode())){
+            logger.info("验证码错误");
+            return ResponseVO.response(null,"The verification code is incorrect", 400);
+        }
         String nowTime = DateTimeUtil.getTime();
-        String activeTime = userInfo.getActiveTime();
+        String activeTime = userInfo1.getActiveTime();
         Long nowLong = Long.parseLong(nowTime);
         Long activeLong = Long.parseLong(activeTime);
+        //创建时间
+        String createTime = DateTimeUtil.getTime();
+        userInfo.setCreateTime(createTime);
         if (nowLong - activeLong > 1){
             logger.info("验证码超时");
             return ResponseVO.response(null, "The verification code timed out", 400);
         }
-        userInfoMapper.updateActive(code);
+        userInfoMapper.updateActive(userInfo.getUserEmail());
         logger.info("激活成功");
-        return ResponseVO.response(null,"The activation was successful", 200);
+        return ResponseVO.response(null,"Registration successful", 200);
     }
 
     /**
@@ -187,5 +189,41 @@ public class UserService {
             logger.info("密码修改失败");
             return ResponseVO.response(null, "Password modification failed", 400);
         }
+    }
+
+    /**
+     * 发送验证码
+     * @return
+     */
+    public ResponseVO getCode(UserInfo userInfo){
+        String code = genCode();
+        String context = "The verification code is:" + code;
+        UserInfo userInfo1 = userInfoMapper.selectByEmail(userInfo.getUserEmail());
+        if(userInfo1 == null){
+            insertUser(userInfo, code);
+        }else{
+            updateActive(userInfo,code);
+        }
+        try{
+            mailService.sendSimplerMail(userInfo.getUserEmail(),subject,context);
+            logger.info("邮件已经发送，请登录邮箱进行激活");
+            return ResponseVO.response(null,"The message has been sent, please Log in to your email address to get a verification code",200);
+        } catch (Exception e){
+            logger.info("邮件发送失败");
+            return ResponseVO.response(null,"The email failed to send, please check if the mailbox is correct",400);
+        }
+    }
+
+    /**
+     * 生成4位验证码
+     * @return
+     */
+    public static String genCode(){
+        StringBuilder codeStr = new StringBuilder();
+        for(int i = 0; i < 4; i++){
+            int tem = (int)(Math.random() * 10);
+            codeStr.append(tem+"");
+        }
+        return codeStr.toString();
     }
 }

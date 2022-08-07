@@ -409,7 +409,7 @@
   </select>
   <update id="updateActive">
     update user_info set IS_ACTIVE = '1'
-    where ACTIVE_CODE = #{activeCode,jdbcType=VARCHAR}
+    where USER_EMAIL = #{userEmail,jdbcType=VARCHAR}
   </update>
   <update id="updateAvtiveState" parameterType="com.yayanovel.entity.UserInfo">
     update user_info
@@ -420,8 +420,9 @@
       TEXT2 = #{text2,jdbcType=VARCHAR},
       ACTIVE_CODE = #{activeCode,jdbcType=VARCHAR},
       ACTIVE_TIME = #{activeTime,jdbcType=VARCHAR},
-      IS_ACTIVE = #{isActive,jdbcType=VARCHAR}
-    where USER_EMAIL = #{userEmail,jdbcType=VARCHAR}
+      IS_ACTIVE = #{isActive,jdbcType=VARCHAR},
+      USER_PASSWORD = #{userPassword, jdbcType=VARCHAR}
+      where USER_EMAIL = #{userEmail,jdbcType=VARCHAR}
   </update>
   <update id="updatePassword">
     update user_info

@@ -1,8 +1,7 @@
 package com.yayanovel.service;
 
-import com.yayanovel.entity.Novel;
-import com.yayanovel.entity.NovelCategory;
-import com.yayanovel.entity.UserInfo;
+import com.yayanovel.controller.viewVO.NovelCatogaryVO;
+import com.yayanovel.entity.*;
 import com.yayanovel.mapper.ChapterMapper;
 import com.yayanovel.mapper.NovelCategoryMapper;
 import com.yayanovel.mapper.NovelMapper;
@@ -15,7 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
-import java.io.File;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -33,14 +33,41 @@ public class NovelService {
     private NovelCategoryMapper novelCategoryMapper;
     @Value("${novel.novelBasePath}")
     private String novelBasePath;
+    /**
+     * 插入小说简介
+     */
+    public void insertIntrodection(){
+        //获取所有小说目录
+        List<Novel> novelList = novelMapper.searchNovelAll();
+        for(int i = 0; i < novelList.size(); i++){
+            String novelName = novelList.get(i).getNovelName();
+            String chapterName = chapterMapper.getChapter(novelName);
+            List<String> contentList = getContent(novelName, chapterName);
+            StringBuilder st = new StringBuilder();
+            for(int j = 0; j < contentList.size(); j++){
+                st.append(contentList.get(j));
+            }
+            String tem = st.toString().trim();
+            if(st.length() > 200){
+                String introducetion = tem.substring(0,200);
+                novelMapper.insertIntroduction(introducetion, novelName);
+            }else{
+                novelMapper.insertIntroduction(tem, novelName);
+            }
+
+        }
+    }
 
     /**
      * 根据小说阅读量获取热门推荐小说
-     * @param cnt 推荐个数
+     * @param cnt 推荐个数,如果cnt为-1，则是全量查询
      * @return
      */
     public List<UserInfo> getHotNovel(int cnt){
         List<UserInfo>  list = novelMapper.selectHotNovel();
+        if(cnt == -1){
+            return list;
+        }
         int size = list.size();
         if (cnt >= size){
             return list;
@@ -107,11 +134,89 @@ public class NovelService {
     }
 
     /**
-     * 搜索小说
+     * 搜索小说,通过小说名字模糊查询
      * @param searchWord
      * @return
      */
     public List<Novel> searchNovel(String searchWord){
         return novelMapper.searchNovel(searchWord);
+    }
+
+    /**
+     * 查询小说类别
+     * @return
+     */
+    public List<NovelCatogaryVO> getNovelCatogary(){
+        List<NovelCategory> novelCategoryList = novelCategoryMapper.selectCatogary();
+        List<NovelCatogaryVO> list = new ArrayList<>();
+        for(int i = 0; i < novelCategoryList.size(); i++){
+            NovelCatogaryVO novelCatogaryVO = new NovelCatogaryVO();
+            novelCatogaryVO.setName(novelCategoryList.get(i).getCategoryName());
+            list.add(novelCatogaryVO);
+        }
+        return list;
+    }
+    /**
+     * 全量查询小说
+     * @return
+     */
+    public List<Novel> getNovelAll(){
+        //查询所有小说
+        return novelMapper.searchNovelAll();
+    }
+
+    public List<String> getContent(String novelName, String chapterName){
+        String path = novelBasePath + "\\\\" + novelName + "\\\\" + chapterName + ".txt";
+        logger.info("小说路径{}", path);
+        File file = null;
+        try{
+            file = ResourceUtils.getFile(path);
+            return getNovelContent(file);
+        } catch (Exception e){
+            logger.info("导入文件加异常",e);
+            return null;
+        }
+    }
+
+    /**
+     * 获取小说内容
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    public List<String> getNovelContent(File file) throws IOException {
+        List<String> contentList = new ArrayList<>();
+        FileInputStream fis = new FileInputStream(file);
+        BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+        String line;
+        while ((line = br.readLine()) != null) {
+            contentList.add(line);
+        }
+        fis.close();
+        return contentList;
+    }
+
+    /**
+     * 查询连载小说
+     * @return
+     */
+    public List<Novel> getOngoingNovel(){
+        return novelMapper.searchOngoingNovel();
+    }
+    /**
+     * 查询完结小说
+     * @return
+     */
+    public List<Novel> getCompletedNovel(){
+        return novelMapper.searchCompletedNovel();
+    }
+
+    /**
+     * 根据类别搜索小说
+     * @param catogary
+     * @return
+     */
+    public List<Novel> getCatogaryNovel(String catogary){
+        return novelMapper.searchCatogaryNovel(catogary);
     }
 }

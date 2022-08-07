@@ -5,13 +5,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class HotNovelLen {
     //热门小说推荐个数
-    private String HotNovelLen;
+    private String hotNovelLen;
 
     public String getHotNovelLen() {
-        return HotNovelLen;
+        return hotNovelLen;
     }
 
     public void setHotNovelLen(String hotNovelLen) {
-        HotNovelLen = hotNovelLen;
+        this.hotNovelLen = hotNovelLen;
     }
 }

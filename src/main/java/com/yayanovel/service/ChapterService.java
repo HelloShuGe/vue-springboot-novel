@@ -3,7 +3,9 @@ package com.yayanovel.service;
 import com.alibaba.druid.filter.AutoLoad;
 import com.yayanovel.entity.Chapter;
 import com.yayanovel.entity.Novel;
+import com.yayanovel.entity.NovelContent;
 import com.yayanovel.mapper.ChapterMapper;
+import com.yayanovel.mapper.NovelContentMapper;
 import com.yayanovel.mapper.NovelMapper;
 import com.yayanovel.util.ResponseVO;
 import com.yayanovel.util.UuidUtil;
@@ -14,7 +16,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
-import java.io.File;
+import java.io.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * 章节的服务层
@@ -26,6 +31,8 @@ public class ChapterService {
     private ChapterMapper chapterMapper;
     @Autowired
     private NovelMapper novelMapper;
+    @Autowired
+    private NovelContentMapper novelContentMapper;
     @Value("${novel.novelBasePath}")
     private String novelBasePath;
     /**
@@ -33,10 +40,10 @@ public class ChapterService {
      * @param novelName
      * @return
      */
-    public ResponseVO insertChapter(String novelName){
+    public ResponseVO insertChapter(String novelName) throws IOException {
         File file = null;
         try{
-            file = ResourceUtils.getFile("classpath:novel");
+            file = ResourceUtils.getFile("D:\\项目\\novel");
         } catch (Exception e){
             logger.info("导入文件加异常",e);
             return ResponseVO.response(null,"文件加载异常", 400);
@@ -54,12 +61,63 @@ public class ChapterService {
     }
 
     /**
+     * 根据章节名字获取章节号
+     * @param fileName
+     * @return
+     */
+    public int getChapterNum(String fileName){
+        StringBuffer st = new StringBuffer();
+        int i = 0;
+        while(i < fileName.length() && (fileName.charAt(i) < '0' || fileName.charAt(i) > '9')){
+            i++;
+        }
+        if(i >= fileName.length()){
+            return 100;
+        }
+        while(i < fileName.length() && fileName.charAt(i) >= '0' && fileName.charAt(i) <= '9'){
+            st.append(fileName.charAt(i));
+            i++;
+        }
+        if(st.length() >= 6){
+            return Integer.parseInt(st.toString().substring(0,6).trim());
+        } else if(st.length() == 0) {
+            return 100;
+        } else{
+            return Integer.parseInt(st.toString().trim());
+        }
+    }
+
+    /**
+     * 获取章节内容
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    public String getNovelContent(File file) throws IOException {
+        StringBuffer sb = new StringBuffer();
+        FileInputStream fis = new FileInputStream(file);
+        BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line);
+        }
+        fis.close();
+        return sb.toString();
+    }
+    /**
      * 插入每一篇小说的章节
      * @param file
      * @return
      */
-    public int insertFun(File file){
+    public int insertFun(File file) throws IOException {
         File[] list = file.listFiles();
+        Arrays.sort(list, new Comparator<File>() {
+            public int compare(File file1, File file2){
+                String fileName1 = file1.getName();
+                String fileName2 = file2.getName();
+                return  getChapterNum(fileName2) - getChapterNum(fileName1);
+            }
+        });
         String novelName = file.getName();
         novelName = novelName.trim();
         logger.info("小说名字" + novelName);
@@ -80,7 +138,7 @@ public class ChapterService {
             Chapter chapter = new Chapter();
             chapter.setNovelUid(novelUuid);
             chapter.setChapterUid(uuidList[i]);
-            chapter.setChapterName(list[i].getName());
+            chapter.setChapterName(list[i].getName().replace(".txt",""));
             if (i == 0){
                 chapter.setPreUid(uuidList[i]);
             } else{
@@ -95,8 +153,58 @@ public class ChapterService {
             String path = novelBasePath + "/" + novelName + "/" + list[i].getName();
             chapter.setChapterAddr(path);
             chapter.setNovelName(novelName);
+            logger.info("小说内容{}", list[i].toString());
             chapterMapper.insert(chapter);
+//            NovelContent novelContent = new NovelContent();
+//            novelContent.setChapterName(chapter.getChapterName());
+//            novelContent.setNovelName(chapter.getNovelName());
+//            novelContent.setNovelUid(chapter.getNovelUid());
+//            novelContent.setChapterUid(chapter.getChapterUid());
+//            novelContent.setNovelContentUid(UuidUtil.getUUID());
+//            novelContent.setNovelContnet(getNovelContent(list[i]));
+//            novelContentMapper.insert(novelContent);
         }
         return 0;
+    }
+
+    /**
+     * 根据小说id查询章节
+     * @param novelUid
+     * @return
+     */
+    public List<Chapter> getChapterByNovelUid(String novelUid){
+        return chapterMapper.getChapterByNovelUid(novelUid);
+    }
+
+    /**
+     * 根据小说id查询章节，分页版
+     * @param novelUid
+     * @param packageNum
+     * @return
+     */
+    public List<Chapter> getChapterByNovelUidPackage(String novelUid, Integer packageNum){
+        return chapterMapper.getChapterByNovelPackage(novelUid, packageNum);
+    }
+    /**
+     * 根据chapterUid获取前一个章节内容
+     * @param chapterUid
+     * @return
+     */
+    public Chapter getPreChapter(String chapterUid){
+        Chapter chapter = chapterMapper.getChapterByChapterUid(chapterUid);
+        logger.info("前一个章节的udi:{}",chapter.getPreUid());
+        Chapter prChapter = chapterMapper.getChapterByChapterUid(chapter.getPreUid());
+        return prChapter;
+    }
+    /**
+     * 根据chapterUid获取章节内容
+     * @param chapterUid
+     * @return
+     */
+    public Chapter getNextChapter(String chapterUid){
+        Chapter chapter = chapterMapper.getChapterByChapterUid(chapterUid);
+        logger.info("前一个章节的udi:{}",chapter.getBackUid());
+        Chapter prChapter = chapterMapper.getChapterByChapterUid(chapter.getBackUid());
+        return prChapter;
     }
 }

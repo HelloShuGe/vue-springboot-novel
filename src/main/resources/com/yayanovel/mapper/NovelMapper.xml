@@ -17,6 +17,7 @@
     <result column="IMG_ADDR" jdbcType="VARCHAR" property="imgAddr" />
     <result column="IS_END" jdbcType="VARCHAR" property="isEnd" />
     <result column="KEYWORDS" jdbcType="VARCHAR" property="keywords" />
+    <result column="CHAPTER_NUM" jdbcType="BIGINT" property="chapterNum" />
     <result column="TEXT1" jdbcType="VARCHAR" property="text1" />
     <result column="TEXT2" jdbcType="VARCHAR" property="text2" />
   </resultMap>
@@ -95,7 +96,7 @@
       This element was generated on Sun Aug 29 22:58:10 CST 2021.
     -->
     NOVEL_ID, NOVEL_UID, NOVEL_NAME, NOVEL_ADDR, READ_NUM, COLLECTION_NUM, CATEGORY, 
-    IMG_ADDR, IS_END, KEYWORDS, TEXT1, TEXT2
+    IMG_ADDR, IS_END, KEYWORDS, CHAPTER_NUM, TEXT1, TEXT2
   </sql>
   <select id="selectByExample" parameterType="com.yayanovel.entity.NovelExample" resultMap="BaseResultMap">
     <!--
@@ -399,7 +400,7 @@
     select
     <include refid="Base_Column_List" />
     from
-    novel order by READ_NUM
+    novel order by READ_NUM desc
   </select>
   <select id="selectUuidByName" resultMap="BaseResultMap">
     select <include refid="Base_Column_List" />
@@ -411,4 +412,30 @@
     from novel
     where NOVEL_NAME like "%"#{searchWord, jdbcType=VARCHAR}"%"
   </select>
+  <select id="searchNovelAll" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+    from novel
+  </select>
+<!--  查询连载小说-->
+  <select id="searchOngoingNovel" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+    from novel
+    where IS_END = 'N'
+  </select>
+  <!--  查询完结小说-->
+  <select id="searchCompletedNovel" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+    from novel
+    where IS_END = 'Y'
+  </select>
+<!--  根据小说类别搜索小说-->
+  <select id="searchCatogaryNovel" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+    from novel
+    where CATEGORY = #{catogary, jdbcType=VARCHAR}
+  </select>
+  <update id="insertIntroduction">
+    UPDATE novel set TEXT1 = #{introduction, jdbcType=VARCHAR} where NOVEL_NAME = #{novelName, jdbcType=VARCHAR}
+  </update>
+
 </mapper>
