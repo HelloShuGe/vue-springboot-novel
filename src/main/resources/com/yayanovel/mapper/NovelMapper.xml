@@ -438,4 +438,9 @@
     UPDATE novel set TEXT1 = #{introduction, jdbcType=VARCHAR} where NOVEL_NAME = #{novelName, jdbcType=VARCHAR}
   </update>
 
+  <select id="getLibaryNovel" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+    from novel where novel_uid in (select NOVEL_UID from bookshelf where USER_EMAIL = #{userEmail, jdbcType=VARCHAR})
+  </select>
+
 </mapper>

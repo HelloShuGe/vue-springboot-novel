@@ -219,4 +219,14 @@ public class NovelService {
     public List<Novel> getCatogaryNovel(String catogary){
         return novelMapper.searchCatogaryNovel(catogary);
     }
+
+    /**
+     * 根据用户邮箱查询收藏小说
+     * @param userEmail
+     * @return
+     */
+    public List<Novel> getLibaryNovel(String userEmail){
+        List novelList = novelMapper.getLibaryNovel(userEmail);
+        return novelList;
+    }
 }

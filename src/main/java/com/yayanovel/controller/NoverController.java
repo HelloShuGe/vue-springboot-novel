@@ -5,6 +5,7 @@ import com.yayanovel.controller.viewVO.CatogaryVO;
 import com.yayanovel.controller.viewVO.ContentVO;
 import com.yayanovel.controller.viewVO.HotNovelLen;
 import com.yayanovel.controller.viewVO.SearchNovelVO;
+import com.yayanovel.entity.Bookshelf;
 import com.yayanovel.entity.Novel;
 import com.yayanovel.entity.UserInfo;
 import com.yayanovel.service.NovelService;
@@ -181,10 +182,26 @@ public class NoverController {
     @ApiOperation(value = "获取小说内容", notes="获取小说内容")
     @RequestMapping(value="api/insertIntroduction",method = RequestMethod.POST)
     public ResponseVO insertIntroduction(){
-        logger.info("hhh");
         novelService.insertIntrodection();
         return null;
     }
 
-
+    /**
+     * 根据用户邮箱查询书架
+     * @param
+     * @return
+     */
+    @CrossOrigin
+    @ApiOperation(value = "查询用户收藏", notes="查询用户收藏")
+    @RequestMapping(value="api/getlibarynovel",method = RequestMethod.POST)
+    public ResponseVO getLibaryNovel(@RequestBody Bookshelf bookshelf){
+        String userEmail = bookshelf.getUserEmail();
+        logger.info("查询用户收藏小说" + userEmail);
+        List novelList = novelService.getLibaryNovel(userEmail);
+        if(novelList == null || novelList.size() == 0){
+            return ResponseVO.response(null,"The query failed",400);
+        }else{
+            return ResponseVO.response(novelList,"Query successful",200);
+        }
+    }
 }

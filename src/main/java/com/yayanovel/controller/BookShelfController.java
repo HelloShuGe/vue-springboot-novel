@@ -31,6 +31,12 @@ public class BookShelfController {
     @ApiOperation(value = "添加小说", notes="添加小说")
     @RequestMapping(value="/addnovel",method = RequestMethod.POST)
     public ResponseVO addNovel(@RequestBody Bookshelf bookshelf){
-
+        logger.info("小说uid"+bookshelf.getNovelUid());
+        logger.info("用户邮箱：" + bookshelf.getUserEmail());
+        if(bookShelfService.addNovel(bookshelf) != 1){
+            return ResponseVO.response(null,"Failed to add book",400);
+        }else{
+            return ResponseVO.response(null,"The book was added successfully",200);
+        }
     }
 }
