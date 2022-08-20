@@ -33,6 +33,8 @@ public class NovelService {
     private NovelCategoryMapper novelCategoryMapper;
     @Value("${novel.novelBasePath}")
     private String novelBasePath;
+    @Value("${env}")
+    private String env;
     /**
      * 插入小说简介
      */
@@ -166,7 +168,13 @@ public class NovelService {
     }
 
     public List<String> getContent(String novelName, String chapterName){
-        String path = novelBasePath + "\\\\" + novelName + "\\\\" + chapterName + ".txt";
+        logger.info("当前环境为{}", env);
+        String path = null;
+        if("test".equals(env)){
+            path = novelBasePath + "\\\\" + novelName + "\\\\" + chapterName + ".txt";
+        }else{
+            path = novelBasePath + "/" + novelName + "/" + chapterName + ".txt";
+        }
         logger.info("小说路径{}", path);
         File file = null;
         try{

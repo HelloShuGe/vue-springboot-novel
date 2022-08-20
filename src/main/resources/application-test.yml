@@ -48,3 +48,5 @@ token:
 #小说相关配置
 novel:
   novelBasePath: D:\\项目\\novel
+
+env: test

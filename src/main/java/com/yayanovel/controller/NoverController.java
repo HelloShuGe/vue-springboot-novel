@@ -80,9 +80,10 @@ public class NoverController {
      */
     @CrossOrigin
     @ApiOperation(value = "搜索小说", notes="搜索小说")
-    @RequestMapping(value="/searchNovel",method = RequestMethod.POST)
+    @RequestMapping(value="api/searchNovel",method = RequestMethod.POST)
     public ResponseVO searchNovel(@RequestBody SearchNovelVO searchNovelVO){
         String searchWord = searchNovelVO.getSearchWord();
+        logger.info("查询的小说名字为" + searchWord);
         if (StringUtils.isEmpty(searchWord)){
             logger.info("输入搜索为空");
             return ResponseVO.response(null,"Input search character cannot be empty",400);

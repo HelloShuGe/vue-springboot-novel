@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8443
 #数据库连接池
 spring:
   autoconfigure:
@@ -47,4 +47,7 @@ token:
   effectiveTime: 3600000
 #小说相关配置
 novel:
-  novelBasePath: /novel
+  novelBasePath: /usr/java/novel
+
+#环境标识
+env: dev
